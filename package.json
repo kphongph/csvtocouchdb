@@ -1,0 +1,12 @@
+{
+  "name": "csvtocouchdb",
+  "version": "0.0.0",
+  "description": "dump csv to couchdb where the first row is field name hash",
+  "main": "loader.js",
+  "repository": "",
+  "author": "Phongphun Kijsanayothin <kphongph@gmail.com>",
+  "dependencies": {
+    "csv": "*"
+  }
+}
+
