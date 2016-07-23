@@ -5,7 +5,7 @@ var crypto = require('crypto');
 // Read CSV content
 
 var csv_name = process.argv[2]?'/'+process.argv[2]:"/test.csv";
-var doc_type = process.argv[3]?proccess.argv[3]:"dmc";
+var doc_type = process.argv[3]?process.argv[3]:"dmc";
 
 var key_mapping = function(key,idx,dict,cb) {
   var name_en = null;
