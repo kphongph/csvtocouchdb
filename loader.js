@@ -150,7 +150,7 @@ fs.createReadStream(__dirname+csv_name).pipe(stream)
      tmp[map_headers[key]] = data[key];
    }
    tmp['row_md5'] = hash_row(tmp);
-   console.log(count++,tmp['row_md5'],tmp["efPeZGe28XhJ+cIUhqLSBQ=="]);
+   // console.log(count++,tmp['row_md5'],tmp["efPeZGe28XhJ+cIUhqLSBQ=="]);
    buffer.push(tmp);
 })
 .on('end',function() {
