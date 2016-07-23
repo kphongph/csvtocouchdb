@@ -64,6 +64,7 @@ var parser = csv.parse({delimiter: ','}, function(err, data) {
     data.forEach(function(val,idx) {
       if(idx!=0) {
         var obj = {};
+        obj['type'] = doc_type;
         val.forEach(function(content,idx) {
           obj[schema[idx]] = content;
         });
