@@ -26,10 +26,12 @@ var key_mapping = function(key,idx,dict,cb) {
   }
 }
 
+
 var thai_hash = function(val) {
   var md5 = crypto.createHash('md5');
   md5.update(val.replace(/\s/g,''));
   return md5.digest('base64');
+  //return digest;
 };
 
 var save = function(data,cb) {
@@ -84,20 +86,23 @@ var hash_row = function(obj) {
     }
   }
   keys.sort();
-  var tObj = {};
   var key;
   var md5 = crypto.createHash('md5');
   for(var index in keys) {
     key = keys[index];
     md5.update(key);
-    md5.update(obj[key]);
+    if(obj[key]) {
+      md5.update(obj[key]);
+    }
   }
   return md5.digest('hex');
 }
 
 var stream = csv({
   raw:false,
-  separator:','
+  separator:',',
+  escape: '"',
+  quote: '"'
 });
 
 
@@ -130,6 +135,8 @@ var sequence = function(list,index) {
 
 var map_headers = {};
 
+var count = 0;
+
 fs.createReadStream(__dirname+csv_name).pipe(stream)
 .on('headers',function(headerList) {
   headerList.forEach(function(val) {
@@ -143,10 +150,12 @@ fs.createReadStream(__dirname+csv_name).pipe(stream)
      tmp[map_headers[key]] = data[key];
    }
    tmp['row_md5'] = hash_row(tmp);
+   console.log(count++,tmp['row_md5'],tmp["efPeZGe28XhJ+cIUhqLSBQ=="]);
    buffer.push(tmp);
 })
 .on('end',function() {
    console.log('done reading');
+   // console.log(JSON.stringify(map_headers,null,2));
    sequence(buffer,0);
 });
 
