@@ -1,11 +1,15 @@
 var fs = require('fs');
-var csv = require('csv');
+var request = require('request');
+var csv = require('csv-parser');
 var crypto = require('crypto');
+var config = require('./config.js');
 
 // Read CSV content
 
 var csv_name = process.argv[2]?'/'+process.argv[2]:"/test.csv";
 var doc_type = process.argv[3]?process.argv[3]:"dmc";
+
+var buffer = [];
 
 var key_mapping = function(key,idx,dict,cb) {
   var name_en = null;
@@ -28,15 +32,48 @@ var thai_hash = function(val) {
   return md5.digest('base64');
 };
 
-var generate_schema = function(field_list,cb) {
-  var schema = [];
-  field_list.forEach(function(val,idx) {
-    var digest = thai_hash(val);
-    schema.push(digest);
-    var obj = {'name_th':val,'name_en':digest};
-    // console.log(JSON.stringify(obj),',');
+var save = function(data,cb) {
+  // console.log('saving '+data.row_md5);
+  var options = {
+    uri:config.couchdb.url+'/'+config.couchdb.db,
+    method:'POST',
+    json:data
+  };
+  request(options,function(err,response,body) {
+    if(!err && response.statusCode == 200) {
+      var json_obj = JSON.parse(body);
+      if(json_obj.ok) {
+        cb(null,true);
+      } else {
+        cb(json_obj,null);
+      }
+    } else {
+      cb(err,null);
+    }
   });
-  cb(schema);
+};
+
+var is_exists = function(md5,cb) {
+  var db_url = config.couchdb.url+'/'+ config.couchdb.db;
+  var request_url = db_url +
+    '/_design/csv/_view/_row_md5?key="'+md5+'"';
+  // console.log(request_url);
+  request(request_url, function(err,response,body) {
+    if(!err) {
+      var json_obj = JSON.parse(body);
+      if(json_obj.rows) {
+        if(json_obj.rows.length == 0)  {
+          cb(null,false);
+        } else {
+          cb(null,true);
+        }
+      } else {
+        cb(json_obj,null);
+      }
+    } else {
+      cb(err,null);
+    }
+  });
 };
 
 var hash_row = function(obj) {
@@ -55,29 +92,61 @@ var hash_row = function(obj) {
     md5.update(key);
     md5.update(obj[key]);
   }
-  return md5.digest('base64');
+  return md5.digest('hex');
 }
 
-var parser = csv.parse({delimiter: ','}, function(err, data) {
-  generate_schema(data[0],function(schema) {
-    var documents = [];
-    data.forEach(function(val,idx) {
-      if(idx!=0) {
-        var obj = {};
-        obj['type'] = doc_type;
-        val.forEach(function(content,idx) {
-          obj[schema[idx]] = content;
-        });
-        obj['row_md5'] = hash_row(obj);
-        documents.push(obj);
-      }
-    });
-    var results = {'docs':documents};
-    console.log(JSON.stringify(results,null,2));
-  });
+var stream = csv({
+  raw:false,
+  separator:','
 });
 
-fs.createReadStream(__dirname+csv_name).pipe(parser)
 
-// Use connect method to connect to the Server
+var sequence = function(list,index) {
+  var index_str = ''+(index+1)+':'+list.length;
+  if(index > list.length-1) return;
+  var data = list[index];   
+  is_exists(data['row_md5'],function(err,exists) {
+    if(!err) {
+      if(exists) {
+        console.log(index_str+' '+'skip     '+data['row_md5']);
+        sequence(list,++index);
+      } else {
+        save(data,function(err) {
+          if(!err) {
+            console.log(index_str+' '+'inserted '+data['row_md5']);
+            sequence(list,++index);
+          } else {
+            console.log(index_str+' '+'error   '+JSON.stringify(err));
+            return;
+          }
+        });
+      }
+    } else {
+      console.log(err);
+      return;
+    }
+  });
+};
+
+var map_headers = {};
+
+fs.createReadStream(__dirname+csv_name).pipe(stream)
+.on('headers',function(headerList) {
+  headerList.forEach(function(val) {
+    map_headers[val] = thai_hash(val);
+  });
+})
+.on('data',function(data) {
+   var tmp = {};
+   tmp['type'] = doc_type;
+   for(var key in map_headers) {
+     tmp[map_headers[key]] = data[key];
+   }
+   tmp['row_md5'] = hash_row(tmp);
+   buffer.push(tmp);
+})
+.on('end',function() {
+   console.log('done reading');
+   sequence(buffer,0);
+});
 
