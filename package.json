@@ -7,6 +7,7 @@
   "author": "Phongphun Kijsanayothin <kphongph@gmail.com>",
   "dependencies": {
     "csv-parser": "*",
-    "request": "~2.74.0"
+    "request": "~2.74.0",
+    "minimist": "~1.2.0"
   }
 }
