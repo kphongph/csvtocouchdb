@@ -3,6 +3,7 @@ logs
 *.log
 npm-debug.log*
 *.csv
+output/*
 
 # Runtime data
 pids
