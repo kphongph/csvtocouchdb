@@ -1,0 +1,84 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/google-chart/google-chart.html">
+
+<script src="/bower_components/pouchdb/dist/pouchdb.min.js"></script>
+
+<dom-module id="dropout-app">
+  <template>
+    <div id="barchart_material" style="width: 900px; height: 500px;"></div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is:'dropout-app',
+  properties: {
+    dbUrl:String,
+    remoteDb:Object,
+    studentCount: { 
+      type:Number,
+      notify:true
+    }
+  },
+  ready: function() {
+    var thisObj = this;
+    this.studentCount = 0;
+    this.remoteDb = new PouchDB(this.dbUrl);
+    this.remoteDb.query('dmc/current_records', {
+      group_level:2,
+    },function(err,res) {
+      var ignore = ['2558/1'];
+      var plot = [];
+      var headers = ['Level'];
+      var semester = [];
+      var _tmp = {};
+      res.rows.forEach(function(record) {
+         if(ignore.indexOf(record.key[0])==-1) {
+           if(semester.indexOf(record.key[0]) == -1) { 
+             semester.push(record.key[0]);
+           }
+           if(!_tmp[record.key[1]]) _tmp[record.key[1]] = {};
+           _tmp[record.key[1]][record.key[0]] = record.value;
+         }
+      });
+      semester.sort();
+      
+      semester.forEach(function(key) {
+        headers.push(key);
+      });
+      plot.push(headers);
+      for(var key in _tmp) {
+        var record = _tmp[key];
+        var row = [];
+        row.push(key);
+        semester.forEach(function(s) {  
+          if(record[s]) {
+            row.push(record[s]);
+          } else {
+            row.push(0);
+          }
+        });
+        plot.push(row);
+      }
+
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable(plot);
+        var options = {
+          chart: {
+            title: 'Study Records',
+            subtitle: 'สถานะปัจจุบันของนักเรียนในแต่ละชั้นปี',
+          },
+          // bars: 'horizontal' // Required for Material Bar Charts.
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+        chart.draw(data, options);
+      }
+    });
+  }
+});
+</script>
