@@ -1,0 +1,24 @@
+{
+  "name": "poorkid",
+  "description": "Poorkid DB",
+  "main": "server.js",
+  "authors": [
+    "Phongphun Kijsanayothin <kphongph@nu.ac.th>"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "webcomponentsjs": "^0.7.22",
+    "polymer": "^1.6.0",
+    "font-roboto": "^0.0.2",
+    "iron-ajax": "^1.2.1"
+  }
+}
+
