@@ -1,12 +1,42 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="/bower_components/google-chart/google-chart.html">
-
-<script src="/bower_components/pouchdb/dist/pouchdb.min.js"></script>
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="/bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <dom-module id="dropout-app">
   <template>
-    <div id="barchart_material" style="width: 900px; height: 500px;"></div>
+    <style include="iron-flex iron-flex-alignment">
+      .host {
+        display:block;
+      }
+      .control {
+        margin:30px;
+      }
+    </style>
+
+    <iron-ajax
+      id="getData"
+      auto 
+      handle-as="json"
+      on-response="handleResponse">
+    </iron-ajax>
+
+    <div class="layout horizontal">
+      <div class="layout vertical control">
+        <paper-listbox multi attr-for-selected="name" selected-values="{{control.selected_records}}">
+          <template is="dom-repeat" items="{{records}}">
+            <paper-item name="{{item}}">{{item}}<paper-item>
+          </template>
+        </paper-listbox>
+        <paper-toggle-button checked="{{control.elementary}}">Elementary</paper-toggle-button>
+        <paper-toggle-button checked="{{control.middle}}">Middle</paper-toggle-button>
+      </div>
+      <div id="barchart_material" style="width:900px;height:500px"></div>
+    </div>
   </template>
 </dom-module>
 
@@ -15,70 +45,153 @@ Polymer({
   is:'dropout-app',
   properties: {
     dbUrl:String,
-    remoteDb:Object,
+    _data:Object,
     studentCount: { 
       type:Number,
       notify:true
+    },
+    records:Array,
+    control: {
+      type:Object,
+      notify:true,
+      value: function() {
+        return {
+          'elementary':true,
+          'middle':true,
+          'level_list': ['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6','ม.1','ม.2','ม.3'],
+          'elementary_range':[0,5],
+          'middle_range':[6,8],
+          'level':['elementary','middle'],
+          'selected_records':[]
+        }
+      }
     }
   },
+  observers: ['_controlChanged(control.*)'],
   ready: function() {
-    var thisObj = this;
-    this.studentCount = 0;
-    this.remoteDb = new PouchDB(this.dbUrl);
-    this.remoteDb.query('dmc/current_records', {
-      group_level:2,
-    },function(err,res) {
-      var ignore = ['2558/1'];
-      var plot = [];
-      var headers = ['Level'];
-      var semester = [];
-      var _tmp = {};
-      res.rows.forEach(function(record) {
-         if(ignore.indexOf(record.key[0])==-1) {
-           if(semester.indexOf(record.key[0]) == -1) { 
-             semester.push(record.key[0]);
-           }
-           if(!_tmp[record.key[1]]) _tmp[record.key[1]] = {};
-           _tmp[record.key[1]][record.key[0]] = record.value;
-         }
-      });
-      semester.sort();
-      
-      semester.forEach(function(key) {
-        headers.push(key);
-      });
-      plot.push(headers);
-      for(var key in _tmp) {
-        var record = _tmp[key];
-        var row = [];
-        row.push(key);
-        semester.forEach(function(s) {  
-          if(record[s]) {
-            row.push(record[s]);
-          } else {
-            row.push(0);
+    this.$.getData.url = this.dbUrl+'/_design/dmc/_view/current_records?group_level=2';
+  },
+  _controlChanged: function(changeRecord) {
+    var data = this.data;
+    if(!data) return;
+    var options = {
+      chart: {
+        title: 'Study Records',
+        subtitle: 'สถานะปัจจุบันของนักเรียนในแต่ละชั้นปี',
+       },
+      // bars: 'horizontal' // Required for Material Bar Charts.
+    };
+    var level = data.getDistinctValues(1);
+
+    var record_list = data.getDistinctValues(0);
+    var level_list = data.getDistinctValues(1);
+    
+    var tmp = [];
+    var control = this.control;
+    
+    control.level.forEach(function(level) {
+      if(control[level]) {
+        level_list.forEach(function(_level) {
+          var idx = control.level_list.indexOf(_level);
+          var range = control[level+'_range'];
+          if(idx>=range[0] && idx<=range[1]) { 
+            tmp.push(_level);
           }
         });
-        plot.push(row);
-      }
-
-      google.charts.load('current', {'packages':['bar']});
-      google.charts.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable(plot);
-        var options = {
-          chart: {
-            title: 'Study Records',
-            subtitle: 'สถานะปัจจุบันของนักเรียนในแต่ละชั้นปี',
-          },
-          // bars: 'horizontal' // Required for Material Bar Charts.
-        };
-
-        var chart = new google.charts.Bar(document.getElementById('barchart_material'));
-        chart.draw(data, options);
+      };
+    });
+    level_list = tmp;
+    
+    tmp=[];
+    record_list.forEach(function(record) {
+      if(control.selected_records.indexOf(record)!=-1) {
+        tmp.push(record);
       }
     });
+    record_list = tmp;
+
+    var tmp = new google.visualization.DataTable();
+    tmp.addColumn('string','Level');
+    var zero = [];
+    record_list.forEach(function(record) {
+      tmp.addColumn('number',record);
+      zero.push(10);
+    });
+    level_list.forEach(function(record) {
+      tmp.addRow([record].concat(zero));
+    });
+
+    for(var i=0;i<data.getNumberOfRows();i++) {
+      var record = data.getValue(i,0);
+      var level = data.getValue(i,1);
+      var value = data.getValue(i,2);
+      var idx = record_list.indexOf(record);
+      var idy = level_list.indexOf(level);
+      if(idx!=-1 && idy!=-1) {
+        tmp.setValue(idy,idx+1,value);
+      }
+    }
+    var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+    chart.draw(tmp, options);
+      
+
+  },
+  handleResponse: function(event) {
+    var res = event.detail.response;
+    var thisObj = this;
+    google.charts.load('current', {'packages':['bar']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string','Record');
+      data.addColumn('string','Level');
+      data.addColumn('number','Count');
+      res.rows.forEach(function(record) {
+        data.addRow(
+          [record.key[0],record.key[1],record.value]
+        );
+      });
+      thisObj.data = data;
+
+      var options = {
+        chart: {
+          title: 'Study Records',
+          subtitle: 'สถานะปัจจุบันของนักเรียนในแต่ละชั้นปี',
+         },
+        // bars: 'horizontal' // Required for Material Bar Charts.
+      };
+      var level = data.getDistinctValues(1);
+
+      var record_list = data.getDistinctValues(0);
+      var level_list = data.getDistinctValues(1);
+      thisObj.records = record_list; 
+
+      var tmp = new google.visualization.DataTable();
+      tmp.addColumn('string','Level');
+      var zero = [];
+      record_list.forEach(function(record) {
+        tmp.addColumn('number',record);
+        zero.push(10);
+      });
+      level_list.forEach(function(record) {
+        tmp.addRow([record].concat(zero));
+      });
+
+      for(var i=0;i<data.getNumberOfRows();i++) {
+         var record = data.getValue(i,0);
+         var level = data.getValue(i,1);
+         var value = data.getValue(i,2);
+         var idx = record_list.indexOf(record);
+         var idy = level_list.indexOf(level);
+         if(idx!=-1 && idy!=-1) {
+           tmp.setValue(idy,idx+1,value);
+         }
+      }
+      
+      var chart = new google.charts.Bar(document.getElementById('barchart_material'));
+      chart.draw(tmp, options);
+    }
   }
 });
 </script>
