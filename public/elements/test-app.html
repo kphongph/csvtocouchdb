@@ -57,8 +57,7 @@
     <div class="horizontal layout flex center">
 
     <div class="vertical layout flex-5">
-      <div>Test</div> 
-      <paper-input 
+     <paper-input 
         label="School ID (e.g., 52030000)" 
         value="{{school}}">
      </paper-input>
@@ -79,10 +78,12 @@
       </template>
       </div>
     </div>
-     
-    <google-chart id="chart" 
-      class="flex-7" type="column" data="{{data}}">
+
+    <google-chart type="column" 
+      id="chart"
+      class="flex-5" data="{{data}}">
     </google-chart>
+
     </div>
   </template>
 </dom-module>
@@ -169,6 +170,7 @@ Polymer({
     // var _record = {};
     var _level = {};
     var school_name = '';
+    var _this = this;
     var recent_record = this.recent_record;
     res.rows.forEach(function(row) {
       if(row.key[1] == 'name') school_name = row.key[2];
@@ -184,10 +186,11 @@ Polymer({
       tmp.push([key,_level[key]]);
     }
     if(tmp.length>1) {
-      this.$.chart.options = {
-        "title": "ข้อมูลนักเรียนไม่ได้ศึกษาต่อของ"+school_name
-      }
       this.set('data',tmp);
+      this.$.chart.options = {
+        title:"จำนวนนักเรียนที่ไม่ได้ศึกษาต่อแบ่งตามชั้นปีสุดท้าย "+school_name,
+        legend: { position: "none" }
+      }
     }
   }
 });
