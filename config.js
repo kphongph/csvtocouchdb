@@ -3,6 +3,17 @@ exports.couchdb = {
   db:'small'
 }
 
+// School Info
+/*
+"0LKGe5ETMywEjU+p+SFGvA==": "รหัสเขตพื้นที่การศึกษา",
+"IHf9RK885Kqx2BDjX29m6g==": "ชื่อเขตพื้นที่การศึกษา",
+"TUMQkGfq3smdyI/l/LZtew==": "รหัสโรงเรียน (smis)",
+"TbYgkcuqSBfov1tCZQLUJw==": "รหัสกระทรวง (10 หลัก)",
+"ZyuDe9+wxOw8t4TIGokL8w==": "ชื่อโรงเรียน",
+"HlW0AyS/efDdzkDyimsuRA==": "ชื่อโรงเรียน (อังกฤษ)"
+*/
+
+
 /*
 L5hcQqye69tMkJGifwjraA== รหัสโรงเรียน
 ZyuDe9+wxOw8t4TIGokL8w== ชื่อโรงเรียน
@@ -84,7 +95,7 @@ bWapbgnTnmRbLxF/hG5HIA== ลักษณะการเดินทางมา�
 
 exports.schema = [
   {
-    type:'student',
+    type:'student',  // dmc
     fields:[
       'efPeZGe28XhJ+cIUhqLSBQ==', // cid
       'AmrB7fxDKndu3eD/JTBxQQ==', // gender
@@ -97,7 +108,7 @@ exports.schema = [
     ]
   },
   {
-    type:'dmc',
+    type:'dmc',  // dmc
     fields:[
       'efPeZGe28XhJ+cIUhqLSBQ==', // cid
       'L5hcQqye69tMkJGifwjraA==', // school id
@@ -107,6 +118,17 @@ exports.schema = [
       'record_as'
     ]
   },
+  {
+    type:'school', // school_info
+    fields:[
+      '0LKGe5ETMywEjU+p+SFGvA==', // area code
+      'IHf9RK885Kqx2BDjX29m6g==', // area name
+      'TUMQkGfq3smdyI/l/LZtew==', // school id
+      'TbYgkcuqSBfov1tCZQLUJw==', // ministry id
+      'ZyuDe9+wxOw8t4TIGokL8w==', // school name thai
+      'HlW0AyS/efDdzkDyimsuRA=='  // school name eng
+    ]
+  }
 ]
 
 

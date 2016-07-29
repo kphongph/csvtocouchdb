@@ -16,6 +16,10 @@
       .control {
         margin:30px;
       }
+      google-chart {
+        width:900px;
+        height:500px;
+      }
     </style>
 
     <iron-ajax
@@ -24,7 +28,8 @@
       handle-as="json"
       on-response="handleResponse">
     </iron-ajax>
-
+    <div id="barchart_material" style="width:900px;height:500px"></div>
+    <!--
     <div class="layout horizontal">
       <div class="layout vertical control">
         <paper-listbox multi attr-for-selected="name" selected-values="{{control.selected_records}}">
@@ -37,6 +42,7 @@
       </div>
       <div id="barchart_material" style="width:900px;height:500px"></div>
     </div>
+    -->
   </template>
 </dom-module>
 
@@ -133,8 +139,6 @@ Polymer({
     }
     var chart = new google.charts.Bar(document.getElementById('barchart_material'));
     chart.draw(tmp, options);
-      
-
   },
   handleResponse: function(event) {
     var res = event.detail.response;

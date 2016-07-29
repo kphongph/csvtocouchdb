@@ -1,0 +1,80 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/google-chart/google-chart.html">
+<link rel="import" href="/bower_components/google-chart/google-chart-loader.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="/bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="/bower_components/paper-item/paper-item.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="test-app">
+  <template>
+    <style include="iron-flex iron-flex-alignment">
+      .host {
+        display:block;
+      }
+      .control {
+        margin:30px;
+      }
+      google-chart {
+        width:900px;
+        height:500px;
+      }
+    </style>
+
+    <iron-ajax
+      id="getData"
+      auto 
+      handle-as="json"
+      on-response="handleResponse">
+    </iron-ajax>
+     
+    <google-chart-loader id="loader"></google-chart-loader>
+
+    <google-chart type="column"
+      data="{{data}}">
+    </google-chart>
+
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is:'test-app',
+  properties: {
+    dbUrl:String,
+  },
+  ready: function() {
+    this.$.getData.url = this.dbUrl+'/_design/dmc/_view/current_records?group_level=2';
+  },
+  handleResponse: function(event) {
+    var res = event.detail.response;
+    var _this = this;
+    var _record = {};
+    var _level = {};
+    res.rows.forEach(function(row) {
+      if(!_record[row.key[0]]) _record[row.key[0]] = 1;
+      if(!_level[row.key[1]]) _level[row.key[1]] = {};
+      if(!_level[row.key[1]][row.key[0]]) 
+        _level[row.key[1]][row.key[0]] = 0;
+      _level[row.key[1]][row.key[0]] += row.value;
+    });
+    
+    this.$.loader.dataTable().then(function(data) {
+      data.addColumn('string','Level');
+      for(var key in _record) {
+        data.addColumn('number',key);
+      }
+      for(var k1 in _level) {
+        var tmp = [k1];
+        for(var k2 in _record) {
+          tmp.push(_level[k1][k2]);
+        }
+        data.addRow(tmp);
+      }
+      _this.data = data;
+    });
+  }
+});
+</script>

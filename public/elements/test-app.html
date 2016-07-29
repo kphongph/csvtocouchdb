@@ -1,0 +1,194 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/paper-styles/color.html">
+<link rel="import" href="/bower_components/google-chart/google-chart.html">
+<link rel="import" href="/bower_components/paper-styles/typography.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="test-app">
+  <style include="iron-flex iron-flex-alignment iron-flex-factors">
+    :host {
+      @apply(--paper-font-common-base);
+      width:100%;
+    }
+    .right {
+      text-align:right
+    }
+    .header {
+     // background-color: var(--paper-indigo-500);
+     // color:white;
+      font-weight:bold;
+    }
+  </style>
+  <template>
+    <iron-ajax
+      auto
+      url$='{{dbUrl}}/_design/dmc/_view/current_records'
+      params='{"group_level":1,"descending":true}'
+      handle-as="json"
+      on-response="_getCurrent">
+    </iron-ajax>
+    
+    <iron-ajax
+      id="school_list"
+      url$='{{dbUrl}}/_design/dmc/_view/current_records_by_school'
+      params='{"group_level":1,"limit":15}'
+      handle-as="json"
+      on-response="_schoolList">
+    </iron-ajax>
+
+    <iron-ajax
+      id="draw"
+      url$='{{dbUrl}}/_design/dmc/_view/current_records_by_school'
+      params='{"group_level":3}'
+      handle-as="json"
+      on-response="_handleDraw">
+    </iron-ajax>
+
+    <iron-ajax
+      id="query"
+      url$='{{dbUrl}}/_design/dmc/_view/current_records_by_school'
+      params='{"group_level":3}'
+      handle-as="json"
+      on-response="_handleResponse">
+    </iron-ajax>
+
+    <div class="horizontal layout flex center">
+
+    <div class="vertical layout flex-5">
+      <div>Test</div> 
+      <paper-input 
+        label="School ID (e.g., 52030000)" 
+        value="{{school}}">
+     </paper-input>
+      <div class="flex">
+      <div class="horizontal flex layout center header">
+        <div class="flex">School</div>
+        <div class="flex-4">Name</div>
+        <div class="flex right">#Dropout</div>
+      </div>
+      <template is="dom-repeat" items="{{dropout}}">
+        <div class="horizontal flex layout center content">
+          <div class="flex">
+            {{item.id}}
+          </div>
+          <div class="flex-4">{{item.name}}</div>
+          <div class="flex right">{{item.count}}</div>
+        </div>
+      </template>
+      </div>
+    </div>
+     
+    <google-chart id="chart" 
+      class="flex-7" type="column" data="{{data}}">
+    </google-chart>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+Polymer({
+  is:'test-app',
+  properties: {
+    dbUrl:String,
+    school: {
+     type:String,
+     observer:'_onSchoolChanged'
+    }
+  },
+  ready: function() {
+  },
+  _onSchoolChanged : function() {
+    var school = this.school;
+    this.$.school_list.params['startkey']='["'+school+'"]';
+    this.$.school_list.generateRequest();
+  },
+  _getCurrent : function(event) {
+    var res = event.detail.response;
+    var total_records = 0;
+    var _this = this;
+    var start_record = null;
+    res.rows.forEach(function(value,idx) {
+      if(idx == 0) {
+        _this.set('recent_record',value.key[0]);
+      } else {
+        if(!start_record) start_record=value.key[0];
+        total_records+=value.value;
+      }
+    });
+    console.log(total_records,start_record);
+    this.$.school_list.generateRequest();
+  },
+  _schoolList : function(event) {
+    var res = event.detail.response;
+    this.schoolSkip += res.rows.length; 
+    this.$.query.params.startkey = '["'+res.rows[0].key[0]+'"]';
+    this.$.query.params.endkey = '["'+res.rows[res.rows.length-1].key[0]+'",{}]';
+    // console.log(this.$.query.params);
+    this.$.query.generateRequest();
+  },
+  _handleResponse : function(event) {
+    var res = event.detail.response;
+    var result = [];
+    var _this = this;
+    var school_dict = {};
+    res.rows.forEach(function(row) {
+      if(!school_dict[row.key[0]]) school_dict[row.key[0]] = {count:0};
+      if(row.key[1]=='name') {
+        school_dict[row.key[0]]['name']=row.key[2];
+      } else {
+        if(row.key[1]!=_this.recent_record) {
+          school_dict[row.key[0]].count+=row.value;
+        }
+      }
+    });
+    for(var key in school_dict) {
+      var obj = {'id':key};
+      obj['name'] = school_dict[key].name;
+      obj['count'] = school_dict[key].count;
+      result.push(obj);
+    }
+    this.set('dropout',result);
+    if(this.$.draw.params.startkey) {
+      var startkey = JSON.parse(this.$.draw.params.startkey);
+      if(res.rows[0].key[0] != startkey[0]) {
+        this.$.draw.params['startkey'] = '["'+res.rows[0].key[0]+'"]';
+        this.$.draw.params['endkey'] = '["'+res.rows[0].key[0]+'",{}]';
+        this.$.draw.generateRequest();
+      }
+    } else {
+      this.$.draw.params['startkey'] = '["'+res.rows[0].key[0]+'"]';
+      this.$.draw.params['endkey'] = '["'+res.rows[0].key[0]+'",{}]';
+      this.$.draw.generateRequest();
+    }
+  },
+  _handleDraw:function(event) {
+    var res = event.detail.response;
+    var tmp = [];
+    // var _record = {};
+    var _level = {};
+    var school_name = '';
+    var recent_record = this.recent_record;
+    res.rows.forEach(function(row) {
+      if(row.key[1] == 'name') school_name = row.key[2];
+      if(row.key[1]!=recent_record && row.key[1]!='name') {
+       // if(!_record[row.key[1]]) _record[row.key[1]] = 1;
+        if(!_level[row.key[2]]) _level[row.key[2]] = 0; 
+        _level[row.key[2]] += row.value;
+      }
+    });
+    
+    tmp.push(["Level","Drop"]);
+    for(var key in _level) {
+      tmp.push([key,_level[key]]);
+    }
+    if(tmp.length>1) {
+      this.$.chart.options = {
+        "title": "ข้อมูลนักเรียนไม่ได้ศึกษาต่อของ"+school_name
+      }
+      this.set('data',tmp);
+    }
+  }
+});
+</script>
