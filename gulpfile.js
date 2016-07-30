@@ -10,7 +10,10 @@ var listStudent = require('./gulp-plugins/list-student');
 var request = require('request');
 var source = require('vinyl-source-stream');
 var streamify = require('gulp-streamify');
+var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 
+var dbUrl = 'http://192.168.1.103:5984/small';
+var student_cid_dir='./output/cid';
 
 gulp.task('dmc_255901',function() {
   gulp.src('csv/2559_01/*.csv')
@@ -18,9 +21,7 @@ gulp.task('dmc_255901',function() {
     .pipe(dmc_parser({
       record_as:"2559/1"
     }))
-    .pipe(md5check({
-      dbUrl:"http://192.168.1.103:5984/small"
-    }))
+    .pipe(md5check({dbUrl:dbUrl}))
     .pipe(bulkinsert('http://192.168.1.103:5984/small'))
     .pipe(gulp.dest('output/2558_01'));
 });
@@ -46,7 +47,14 @@ gulp.task('list_student',function() {
   request(options)
   .pipe(source('student.json'))
   .pipe(streamify(listStudent()))
-  .pipe(gulp.dest('./output/cid'));
+  .pipe(gulp.dest(student_cid_dir));
+});
+
+gulp.task('update_current_record',function() {
+  gulp.src(student_cid_dir+'/src/*')
+   .pipe(changed(student_cid_dir+'/dest'))
+   .pipe(updateCurrentRecord(dbUrl))
+    .pipe(gulp.dest(student_cid_dir+'/dest'));
 });
 
 gulp.task('default',function() {
