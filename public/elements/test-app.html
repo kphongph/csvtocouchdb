@@ -1,10 +1,13 @@
 <link rel="import" href="/bower_components/polymer/polymer.html">
 <link rel="import" href="/bower_components/paper-styles/color.html">
 <link rel="import" href="/bower_components/google-chart/google-chart.html">
+<link rel="import" href="/bower_components/google-chart/google-chart-loader.html">
 <link rel="import" href="/bower_components/paper-styles/typography.html">
 <link rel="import" href="/bower_components/paper-input/paper-input.html">
 <link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
 <dom-module id="test-app">
   <style include="iron-flex iron-flex-alignment iron-flex-factors">
@@ -54,6 +57,8 @@
       on-response="_handleResponse">
     </iron-ajax>
 
+    <google-chart-loader packages='["geochart","corechart"]' on-loaded="_loaded"></google-chart-loader>
+
     <div class="horizontal layout flex center">
 
     <div class="vertical layout flex-5">
@@ -78,13 +83,19 @@
       </template>
       </div>
     </div>
-
-    <google-chart type="column" 
-      id="chart"
-      class="flex-5" data="{{data}}">
-    </google-chart>
-
+      <google-chart type="column" 
+        id="chart"
+        class="flex-5" data="{{data}}">
+      </google-chart>
     </div>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+
+    <!--
+    <google-chart type="geo" 
+      options='{"region": "TH","displayMode":"markers"}'
+      data='[["City","Population"],["TH-18",2761477]]'>
+    </google-chart>
+    -->
   </template>
 </dom-module>
 
@@ -99,6 +110,22 @@ Polymer({
     }
   },
   ready: function() {
+  },
+  _loaded : function(pkg) {
+    var data = google.visualization.arrayToDataTable([
+        ['City',   'Population'],
+        ['TH-18',  65700000],
+      ]);
+
+      var options = {
+        sizeAxis: { minValue: 0, maxValue: 100 },
+        region: 'TH', // Western Europe
+        displayMode: 'markers',
+        colorAxis: {colors: ['#e7711c', '#4374e0']} // orange to blue
+      };
+
+      var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
   },
   _onSchoolChanged : function() {
     var school = this.school;
