@@ -76,4 +76,20 @@ module.exports.views = {
       return sum(values);
     }
   },
+  "current_records_by_city" : {
+    "map": function(doc) {
+      if(doc.type == "dmc") {
+        if(doc.current) {
+          var cid = doc['efPeZGe28XhJ+cIUhqLSBQ=='];
+          var sid = doc['L5hcQqye69tMkJGifwjraA=='];
+          var level = doc['FZEZ8EDgrK3sM9aUjMikeg=='];
+          var sid_code = 'TH-'+sid.substring(0,2);
+          emit([sid_code,doc.record_as,sid,cid],1);
+        }
+      }
+    },
+    "reduce":function(key,values,rereduce) {
+      return sum(values);
+    }
+  },
 };

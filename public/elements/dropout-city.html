@@ -1,0 +1,73 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/google-chart/google-chart.html">
+<link rel="import" href="/bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="/bower_components/google-chart/google-chart-loader.html">
+<link rel="import" href="/bower_components/paper-styles/typography.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="dropout-city">
+  <style include="iron-flex iron-flex-alignment iron-flex-factors">
+    .container {
+      @apply(--layout-horizontal);
+    }
+    google-chart {
+      height:100%;
+      width:100%;
+    }
+  </style> 
+  <template>
+    <iron-ajax
+      id="query"
+      url$='{{dbUrl}}/_design/dmc/_view/current_records_by_city'
+      params='{"group_level":2}'
+      handle-as="json"
+      on-response="_getCurrent">
+    </iron-ajax>
+
+    <google-maps-api id="apis" api-key="AIzaSyClUgrE8OVzSLRyL1oTgWby-PjV-u0Bivk" 
+       version="3.exp">
+    </google-maps-api>
+   
+    <google-chart id="geochart" 
+     type="geo" 
+     options='{"region": "TH", "displayMode":"markers" }' 
+     data="{{cityDrop}}"> 
+    </google-chart>
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'dropout-city',
+    properties:{
+      dbUrl: String,
+      recentRecord: {
+        type:String,
+        observer:'_recentRecordChanged'
+      }
+    },
+    _recentRecordChanged:function(n,o) {
+      console.log(o,n);
+      if(o!=n) {
+        if(n) this.$.query.generateRequest();
+      }
+    },
+    _getCurrent: function(event) {
+      var res = event.detail.response;
+      var recent = this.recentRecord;
+      var city = {};
+      res.rows.forEach(function(row) {
+        if(row.key[1]!=recent) {
+          if(!city[row.key[0]]) city[row.key[0]] = 0;
+          city[row.key[0]]+=row.value;
+        }
+      });
+      var tmp = [["City","Dropout"]];
+      for(var key in city) {
+        tmp.push([key,city[key]]);
+      }
+      this.set('cityDrop',tmp); 
+    }
+  });
+</script>
