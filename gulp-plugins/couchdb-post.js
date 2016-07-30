@@ -4,8 +4,8 @@ var through = require('through2');
 module.exports = function(url,opts) {
   var opts = opts || {};
   return through.obj(function(file,enc,callback) {
-    var json = JSON.parse(file.contents.toString());
     if(file.isBuffer()) {
+      var json = JSON.parse(file.contents.toString());
       request({
         method: 'GET',
         url:url+'/'+json._id 
