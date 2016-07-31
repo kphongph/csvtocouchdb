@@ -15,7 +15,8 @@
     "gulp-util": "~3.0.7",
     "stream-buffers": "~3.0.0",
     "vinyl-source-stream": "~1.1.0",
-    "gulp-streamify": "~1.0.2"
+    "gulp-streamify": "~1.0.2",
+    "lodash": "~4.14.1"
   },
   "devDependencies": {
     "gulp": "~3.9.1",

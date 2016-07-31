@@ -1,6 +1,6 @@
 var through = require('through2');
 
-function couchdbDesign(opts) {
+module.exports = function(opts) {
   return through.obj(function(file,enc,callback) {
     var doc = {};
     if(file.isBuffer()) {
@@ -17,10 +17,9 @@ function couchdbDesign(opts) {
       }
     }
     // console.log(JSON.stringify(doc,null,2));
-    file.contents = new Buffer(JSON.stringify(doc));
+    file.contents = new Buffer(JSON.stringify([doc]));
     this.push(file);
     return callback();
   });
 }
 
-module.exports = couchdbDesign;

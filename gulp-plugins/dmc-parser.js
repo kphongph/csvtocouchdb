@@ -2,8 +2,8 @@ var request = require('request');
 var through = require('through2');
 var gutil = require('gulp-util');
 var csv = require('csv-parser');
-var streamBuffers = require('stream-buffers');
-var util = require('./couchdb-util');
+var util = require('./util');
+var fs = require('fs');
 
 var schema = [
   {
@@ -32,21 +32,22 @@ var schema = [
   }
 ];
 
-module.exports = function(opts) {
-  var opts = opts || {};
+module.exports = function() {
+  var opts = {};
   return through.obj(function(file,enc,callback) {
-    var _this = this;
+    var self = this;
     var stream = csv({raw:false,separator:',',escape: '"',quote: '"'});
     if(file.isBuffer()) {
       var map_headers = {};
       var re_map_headers = {};
       var working_type = [];
       var docs = [];
+      
+      var _file = file.path.split('/');
+      var _items = _file[_file.length-1].split('_');
+      opts['record_as'] = _items[0]+'/'+parseInt(_items[1],10);
      
-      var readStream = new streamBuffers.ReadableStreamBuffer();
-      readStream.put(file.contents);
-      readStream.stop();
-      readStream.pipe(stream)
+      fs.createReadStream(file.path).pipe(stream)
       .on('headers',function(headers) {
          headers.forEach(function(val) {
            map_headers[val] = util.thai_hash(val);
@@ -74,7 +75,7 @@ module.exports = function(opts) {
       })
       .on('end',function() {
         file.contents = new Buffer(JSON.stringify(docs));
-        _this.push(file);
+        self.push(file);
         callback();
       });
     }

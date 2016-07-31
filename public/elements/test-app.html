@@ -32,7 +32,8 @@
       height:400px;
     }
     dropout-city {
-      height:40%;
+      height:100%;
+      width:100%;
     }
   </style> 
   <template>
@@ -67,14 +68,14 @@
       handle-as="json"
       on-response="_handleResponse">
     </iron-ajax>
-    <div class="vertical layout">
-     
-       <div class="horizontal layout">
-         <dropout-city class="flex" db-url="{{dbUrl}}" recent-record="{{recentRecord}}">
+    
+    <div class="horizontal layout">
+       <div class="horizontal layout flex" style="margin-left:20px">
+         <dropout-city db-url="{{dbUrl}}" recent-record="{{recentRecord}}">
          </dropout-city>
        </div>
     
-    <div class="horizontal layout start">
+    <div class="verital layout start flex" style="margin-right:20px">
      <div class="flex-5">
       <div class="vertical layout">
        <div class="flex">

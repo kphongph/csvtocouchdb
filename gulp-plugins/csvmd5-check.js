@@ -22,8 +22,7 @@ var is_exists = function(dbUrl,md5,cb) {
   });
 };
 
-module.exports = function(opts) {
-  var opts = opts || {};
+module.exports = function(dbUrl) {
   return through.obj(function(file,enc,callback) {
     var _this = this;
     var new_docs = [];
@@ -31,7 +30,7 @@ module.exports = function(opts) {
     if(file.isBuffer()) {
       var docs = JSON.parse(file.contents.toString());
       docs.forEach(function(doc) {
-        is_exists(opts.dbUrl,doc.csv_md5,function(err,exists) {
+        is_exists(dbUrl,doc.csv_md5,function(err,exists) {
           count++;
           if(err) callback(err);
           if(!exists) {
