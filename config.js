@@ -3,6 +3,9 @@ exports.couchdb = {
   db:'small'
 }
 
+exports.dmc_dir = './csv/dmc'; // sub-folder YYYY-0S
+exports.school_dir = './csv/school';
+
 // School Info
 /*
 "0LKGe5ETMywEjU+p+SFGvA==": "รหัสเขตพื้นที่การศึกษา",

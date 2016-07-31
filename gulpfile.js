@@ -3,19 +3,17 @@ var changed = require('gulp-changed');
 var design = require('./gulp-plugins/couchdb-design');
 var dmc_parser = require('./gulp-plugins/dmc-parser');
 var md5check = require('./gulp-plugins/csvmd5-check');
-var listStudent = require('./gulp-plugins/list-student');
-var request = require('request');
-var source = require('vinyl-source-stream');
-var streamify = require('gulp-streamify');
 var postbulk = require('./gulp-plugins/post-bulk');
 var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
+var config = require('./config.js');
 
-var dbUrl = 'http://192.168.1.103:5984/small';
-var school_dir = './csv/school';
+var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
+var dmc_csv = config.dmc_dir;
+var school_dir = config.school_dir;
 
 gulp.task('split_school',function() {
-  gulp.src('./csv/src/**/*.csv')
+  gulp.src(dmc_csv+'/**/*.csv')
    .pipe(split({group_by:'รหัสโรงเรียน'}))
    .pipe(gulp.dest(school_dir+'/src'));
 });

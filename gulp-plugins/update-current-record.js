@@ -17,6 +17,7 @@ var get_docs = function(opts,cb) {
       method:'GET'
     }
     request(options,function(err,res,body) {
+      if(err) throw new gutil.PluginError('update',err);
       retrieved++;
       var obj = JSON.parse(body);
       if(!opts.set_current) {
@@ -48,7 +49,7 @@ var get_study_records = function(url,cid,cb) {
       var record_as = row.key[1].split('/');
       var year = parseInt(record_as[0],10);
       var time = parseInt(record_as[1],10);
-      if(row.key[2]) current_max.push(row.id);
+      if(row.key[2]!=0) current_max.push(row.id);
       if(max_obj[0]<year) {
         max_obj[0]=year;  
         max_obj[1]=time;
@@ -64,15 +65,15 @@ var get_study_records = function(url,cid,cb) {
     var set_list = [];
     var clear_list = [];
     res.rows.forEach(function(row) {
-      if(row.key[1]==recent && !row.key[2]) {
+      if(row.key[1]==recent && (row.key[2]!=1)) {
         set_list.push(row.id);
       } 
-      if(row.key[1]!=recent && row.key[2]) { 
+      if(row.key[1]!=recent && (row.key[2]==1)) { 
         clear_list.push(row.id);
       }
     });
 
-    if(set_list.length == 0 && clear_list.length==0) { 
+    if(set_list.length==0 && clear_list.length==0) { 
       cb([]);
     } else {
       var _docs = [];
@@ -109,8 +110,8 @@ module.exports = function(url,opts) {
       var count = 0;
       if(res.rows.length == 0) 
         callback(new gutil.PluginError('test','not found records'));
+      var result = [];
       res.rows.forEach(function(row) {
-        var result = [];
         // gutil.log(record,sid,row.key[3]);
         get_study_records(url,row.key[3],function(docs) {
           count++;
