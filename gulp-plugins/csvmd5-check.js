@@ -3,6 +3,7 @@ var through = require('through2');
 var gutil = require('gulp-util');
 
 var is_exists = function(dbUrl,md5,cb) {
+  // gutil.log(md5);
   var request_url = dbUrl + '/_design/csv/_view/_csv_md5?key="'+md5+'"';
   request(request_url, function(err,response,body) {
     if(!err) {

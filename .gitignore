@@ -6,6 +6,7 @@ npm-debug.log*
 output/*
 public/bower_components/*
 working/*
+csv/*
 
 # Runtime data
 pids
