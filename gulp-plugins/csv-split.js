@@ -5,7 +5,7 @@ var _ = require('lodash');
 var csv = require('csv-parser');
 var fs = require('fs');
 var path = require('path');
-var iconv = require('iconv');
+// var iconv = require('iconv');
 
 var PLUGIN_NAME = 'csv-split';
 
