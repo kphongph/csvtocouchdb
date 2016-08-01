@@ -5,6 +5,7 @@ var _ = require('lodash');
 var csv = require('csv-parser');
 var fs = require('fs');
 var path = require('path');
+var iconv = require('iconv');
 
 var PLUGIN_NAME = 'csv-split';
 
@@ -21,7 +22,12 @@ var write_csv_line = function(arr) {
 var split = function(opts,data) {
   var self = this;
   return through.obj(function(chunk,enc,cb) {
-    var name = chunk[opts.group_by];
+    var _new_key = null;
+    for(var key in chunk) {
+      var _key = key.replace(/\s+/g,'');
+      if(_key === opts.group_by)  _new_key = key;
+    }
+    var name = chunk[_new_key];
     var write_obj = {'name':name,'data':chunk};
     this.push(write_obj);
     cb();
@@ -40,7 +46,11 @@ module.exports = function(opts) {
     gutil.log(file.path);
     var contents = {};
 
-    fs.createReadStream(file.path).pipe(stream)
+ //   var _iconv = new iconv.Iconv('ISO-8859-1','UTF-8');
+
+    fs.createReadStream(file.path)
+ //   .pipe(_iconv)
+    .pipe(stream)
     .pipe(split(opts))
     .on('data',function(data) {
       if(contents[data.name]) {
