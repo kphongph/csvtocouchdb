@@ -27,7 +27,9 @@ var split = function(opts,data) {
       var _key = key.replace(/\s+/g,'');
       if(_key === opts.group_by)  _new_key = key;
     }
+    
     var name = chunk[_new_key];
+    if(!name) throw new gutil.PluginError('test','not found key');
     var write_obj = {'name':name,'data':chunk};
     this.push(write_obj);
     cb();
@@ -77,6 +79,7 @@ module.exports = function(opts) {
         gutil.log(tmp.basename);
         self.push(tmp);
       }
+      // callback(null);
       // delete file
       fs.unlink(file.path,function(err) {     
         if(err) throw err;
