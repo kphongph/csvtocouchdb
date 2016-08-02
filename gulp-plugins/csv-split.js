@@ -74,9 +74,15 @@ module.exports = function(opts) {
           path: path.join(__dirname,'./schools/'+parent_dir+'_'+key+'.csv'),
           contents: new Buffer(contents[key].content)
         });
+        gutil.log(tmp.basename);
         self.push(tmp);
       }
-      callback(null);
+      // delete file
+      fs.unlink(file.path,function(err) {     
+        if(err) throw err;
+        gutil.log(file.path+' deleted');
+        callback(null);
+      });
     });
   });
 }
