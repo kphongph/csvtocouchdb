@@ -8,15 +8,25 @@ var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
 var config = require('./config.js');
 
+var deletefile = require('gulp-delete-file');
 var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
 var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
-gulp.task('split_school',function() {
+gulp.task('split',function() {
   gulp.src(dmc_csv+'/**/*.csv')
    .pipe(split({group_by:'รหัสโรงเรียน'}))
    .pipe(gulp.dest(school_dir+'/src'));
 });
+
+
+gulp.task('delete_src',['split'],function() {
+  var regexp =/\w*\.csv$/;
+  gulp.src(dmc_csv+'/**/*.csv')
+   .pipe(deletefile({reg: regexp,deleteMatch:true}));
+});
+
+gulp.task('split_school',['split','delete_src']);
 
 gulp.task('load_dmc',function() {
   gulp.src(school_dir+'/src/*.csv')
