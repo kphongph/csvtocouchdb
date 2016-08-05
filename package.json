@@ -15,12 +15,17 @@
     "gulp-streamify": "~1.0.2",
     "lodash": "~4.14.1",
     "gulp-delete-file": "~1.0.2",
-    "gulp-respond": "~1.0.0"
+    "gulp-respond": "~1.0.0",
+    "mssql": "~3.3.0",
+    "dbf-parser": "0.0.1",
+    "stream-dbf": "~0.2.1",
+    "iconv-lite": "~0.4.13"
   },
   "devDependencies": {
     "gulp": "~3.9.1",
     "through2": "~2.0.1",
     "gulp-changed": "~1.3.1",
-    "bower": "~1.7.9"
+    "bower": "~1.7.9",
+    "gulp-iconv": "0.0.1"
   }
 }

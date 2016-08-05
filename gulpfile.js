@@ -6,17 +6,37 @@ var md5check = require('./gulp-plugins/csvmd5-check');
 var postbulk = require('./gulp-plugins/post-bulk');
 var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
+var mssql_src = require('./gulp-plugins/mssql-src');
 var config = require('./config.js');
 
 var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
 var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
-gulp.task('split_school',function() {
-  gulp.src(dmc_csv+'/**/*.csv')
-   .pipe(split({group_by:'รหัสโรงเรียน'}))
-   .pipe(gulp.dest(school_dir+'/src'));
+gulp.task('mssql',function() {
+  gulp.src('./mssql/src/*.sql')
+   .pipe(changed('./mssql/dest'))
+   .pipe(mssql_src({config:{
+     user:'sa',
+     password:'Theerawutt53',
+     server:'10.27.65.45',
+     database:'BotGetDataSchool2559',
+     stream:true,
+     connectionTimeout:500000,
+     requestTimeout:500000,
+     options:{
+       encrypt:true
+     }
+   }}))
+   .pipe(gulp.dest('./mssql/dest'));
 });
+
+
+// gulp.task('split_school',function() {
+//  gulp.src(dmc_csv+'/**/*.csv')
+//   .pipe(split({group_by:'รหัสโรงเรียน'}))
+//   .pipe(gulp.dest(school_dir+'/src'));
+// });
 
 
 gulp.task('load_dmc',function() {
