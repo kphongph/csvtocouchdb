@@ -19,7 +19,8 @@
     "mssql": "~3.3.0",
     "dbf-parser": "0.0.1",
     "stream-dbf": "~0.2.1",
-    "iconv-lite": "~0.4.13"
+    "iconv-lite": "~0.4.13",
+    "body-parser": "~1.15.2"
   },
   "devDependencies": {
     "gulp": "~3.9.1",

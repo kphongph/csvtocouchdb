@@ -6,29 +6,18 @@ var md5check = require('./gulp-plugins/csvmd5-check');
 var postbulk = require('./gulp-plugins/post-bulk');
 var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
-var mssql_src = require('./gulp-plugins/mssql-src');
 var config = require('./config.js');
+var pop_parser = require('./gulp-plugins/pop-parser');
 
 var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
 var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
-gulp.task('mssql',function() {
-  gulp.src('./mssql/src/*.sql')
-   .pipe(changed('./mssql/dest'))
-   .pipe(mssql_src({config:{
-     user:'sa',
-     password:'Theerawutt53',
-     server:'10.27.65.45',
-     database:'BotGetDataSchool2559',
-     stream:true,
-     connectionTimeout:500000,
-     requestTimeout:500000,
-     options:{
-       encrypt:true
-     }
-   }}))
-   .pipe(gulp.dest('./mssql/dest'));
+gulp.task('pop',function() {
+  gulp.src('./population/A_Pop_T3/file_1.csv')
+   .pipe(changed('./population/dest/A_Pop_T3'))
+   .pipe(pop_parser())
+   .pipe(gulp.dest('./population/dest/A_Pop_T3'));
 });
 
 

@@ -18,6 +18,8 @@
   <template>
     <iron-ajax
       id="savefile"
+      method="POST"
+      content-type="application/json"
       url$='{{controller}}/save_file'
       handle-as="json"
       on-response="_doneCurrent">
@@ -52,7 +54,10 @@
        <span>{{fileName}}</span>
      </div>
      <div>
-     <paper-progress value="{{checkedRecord}}" max="{{totalRecord}}"></paper-progress>
+      <paper-progress 
+        value="{{checkedRecord}}" 
+        max="{{totalRecord}}">
+      </paper-progress>
      </div>
      <div class="horizontal layout">
        <div class="flex">
@@ -111,20 +116,22 @@
       var content = contents.rows[0];
       console.log(contents.rows.length);
       var self = this;
-      this.set('fileName',contents.file);
+      this.set('fileName',contents.layout.file);
       this.set('totalRecord',contents.rows.length);
       this.set('checkedRecord',0);
+      this.set('insertedRecord',0);
       this._iterateCheck(0);
     },
     _checkNext:function() {
       var idx = this.checkedRecord;
       idx = idx+1;
-      console.log('next',idx);
+     //  console.log('next',idx);
       this.set('checkedRecord',idx);
       if(idx != this.totalRecord) {
         this._iterateCheck(idx);
       } else {
-        this.$.savefile.params={'file':this.contents.file};
+        console.log(this.contents.layout);
+        this.$.savefile.body=this.contents.layout;
         this.$.savefile.generateRequest();
       }
     },
@@ -132,7 +139,7 @@
       var idx = this.checkedRecord;
       if(event.detail.response.rows.length==0) {
         this.$.postnew.body = this.contents.rows[idx];
-        console.log(this.$.postnew.body);
+       // console.log(this.$.postnew.body);
         this.$.postnew.generateRequest();
       } else {
         this._checkNext();
@@ -140,6 +147,7 @@
     },
     _responsePost:function(event) {
       if(event.detail.response.ok) {
+      //  console.log(event.detail.response);
         this.set('insertedRecord',this.insertedRecord+1);
         this._checkNext();
       } 

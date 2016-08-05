@@ -23,6 +23,7 @@ var write_csv_line = function(arr) {
 var count = 0;
 var idx = 1;
 var str = null;
+
 stream.on('data',function(record) {
   for(var key in record) {
     if(record[key] instanceof Buffer ) {
@@ -44,11 +45,16 @@ stream.on('data',function(record) {
 
   if(count == 2000) {
     count=0;
-   
-    fs.writeFileSync('file_'+idx+'.csv',str);
+    console.log('creating',idx);
+    fs.writeFileSync(target_dir+'file_'+idx+'.csv',str);
     idx++;
     str=null;
   } else {
     count++;
   }
+});
+
+stream.on('end',function() {
+  console.log('creating',idx);
+  fs.writeFileSync(target_dir+'file_'+idx+'.csv',str);
 });
