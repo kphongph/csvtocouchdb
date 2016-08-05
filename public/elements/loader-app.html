@@ -1,0 +1,130 @@
+<link rel="import" href="/bower_components/polymer/polymer.html">
+<link rel="import" href="/bower_components/paper-styles/color.html">
+<link rel="import" href="/bower_components/paper-styles/typography.html">
+<link rel="import" href="/bower_components/paper-input/paper-input.html">
+<link rel="import" href="/bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="/bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<dom-module id="loader-app">
+  <style include="iron-flex iron-flex-alignment iron-flex-factors">
+    :host {
+      @apply(--paper-font-common-base);
+      width: 100%;
+      height:100%
+    }
+  </style> 
+  <template>
+    <iron-ajax
+      id="savefile"
+      url$='{{controller}}/save_file'
+      handle-as="json"
+      on-response="_doneCurrent">
+    </iron-ajax>
+    
+    <iron-ajax 
+      id="getfile"
+      url$='{{controller}}/get_file'
+      handle-as="json"
+      on-response="_getCurrent">
+    </iron-ajax>
+
+    <iron-ajax 
+      id="checkmd5"
+      url$='{{dbUrl}}/_design/csv/_view/_csv_md5'
+      handle-as="json"
+      on-response="_checkMD5">
+    </iron-ajax>
+
+    <iron-ajax 
+      id="postnew"
+      method="POST"
+      url$='{{dbUrl}}'
+      content-type="application/json"
+      handle-as="json"
+      on-response="_responsePost">
+    </iron-ajax>
+
+    <div>
+     <div>{{fileName}}</div>
+     <paper-progress value="{{checkedRecord}}" max="{{totalRecord}}"></paper-progress>
+     <div>{{checkedRecord}}</di>
+     <div>{{totalRecord}}</di>
+   
+    </div>
+      
+  </template>
+</dom-module>
+
+<script>
+  Polymer({
+    is: 'loader-app',
+    properties:{
+      dbUrl: String,
+      fileName:String,
+      newRecords: {
+        type:Array,
+        value:function() {
+          return [];
+        }
+      },
+      checkedRecord:Number,
+      recentRecord: {
+        type:String,
+        notify:true
+      },
+      contents : {
+        type:Object,
+      }
+    },
+    ready:function() {
+      this.$.getfile.generateRequest();
+    },
+    _iterateCheck:function(index) {
+      var content = this.contents.rows[index];
+      this.$.checkmd5.params = {'key':'\"'+content.csv_md5+'\"'};
+      this.$.checkmd5.generateRequest();
+    },
+    _getCurrent:function(event) {
+      var contents = event.detail.response;
+      this.set('contents',contents);
+      
+      var content = contents.rows[0];
+      console.log(contents.rows.length);
+      var self = this;
+      this.set('fileName',contents.file);
+      this.set('totalRecord',contents.rows.length);
+      this.set('checkedRecord',0);
+      this._iterateCheck(0);
+    },
+    _checkNext:function() {
+      var idx = this.checkedRecord;
+      idx = idx+1;
+      console.log('next',idx);
+      this.set('checkedRecord',idx);
+      if(idx != this.totalRecord) {
+        this._iterateCheck(idx);
+      } else {
+        this.$.savefile.params={'file':this.contents.file};
+        this.$.savefile.generateRequest();
+      }
+    },
+    _checkMD5:function(event) {
+      var idx = this.checkedRecord;
+      if(event.detail.response.rows.length==0) {
+        this.$.postnew.body = this.contents.rows[idx];
+        console.log(this.$.postnew.body);
+        this.$.postnew.generateRequest();
+      } else {
+        this._checkNext();
+      }
+    },
+    _responsePost:function(event) {
+      if(event.detail.response.ok) {
+        this._checkNext();
+      } 
+    },
+    _doneCurrent:function(event) {
+    }
+  });
+</script>

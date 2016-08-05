@@ -14,7 +14,8 @@
     "gulp-util": "~3.0.7",
     "gulp-streamify": "~1.0.2",
     "lodash": "~4.14.1",
-    "gulp-delete-file": "~1.0.2"
+    "gulp-delete-file": "~1.0.2",
+    "gulp-respond": "~1.0.0"
   },
   "devDependencies": {
     "gulp": "~3.9.1",

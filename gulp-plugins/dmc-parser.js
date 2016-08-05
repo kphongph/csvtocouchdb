@@ -42,6 +42,7 @@ module.exports = function() {
       var re_map_headers = {};
       var working_type = [];
       var docs = [];
+      gutil.log('parsing',file.path);
       
       var _file = file.path.split('/');
       var _items = _file[_file.length-1].split('_');
@@ -75,6 +76,7 @@ module.exports = function() {
       })
       .on('end',function() {
         file.contents = new Buffer(JSON.stringify(docs));
+        gutil.log('parsed ',file.path);
         self.push(file);
         callback();
       });

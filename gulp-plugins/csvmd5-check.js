@@ -30,13 +30,15 @@ module.exports = function(dbUrl) {
     var count = 0;
     if(file.isBuffer()) {
       var docs = JSON.parse(file.contents.toString());
+      gutil.log('check md5',file.path);
       docs.forEach(function(doc) {
         is_exists(dbUrl,doc.csv_md5,function(err,exists) {
           count++;
+          gutil.log('checked md5 '+count+'/'+docs.length);
           if(err) callback(err);
           if(!exists) {
             new_docs.push(doc);
-          }
+          } 
           if(count == docs.length) {
             file.contents = new Buffer(JSON.stringify(new_docs));
             _this.push(file);

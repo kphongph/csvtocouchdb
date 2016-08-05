@@ -2,7 +2,10 @@
   <head>
     <script src="/bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <!--
     <link rel="import" href="/elements/test-app.html">
+    -->
+    <link rel="import" href="/elements/loader-app.html">
   </head>
   
   <style is="custom-style">
@@ -15,6 +18,11 @@
   </style>
   
   <body>
-    <test-app db-url="http://10.27.65.40:81/small"></test-app>
+    <loader-app 
+      controller="http://10.27.65.18:3000/dmc"
+      db-url="http://10.27.65.18:5984/small"></loader-app>
+    <!--
+    <test-app db-url="http://10.27.65.18:5984/small"></test-app>
+    -->
   </body>
 </html>
