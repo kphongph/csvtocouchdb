@@ -10,7 +10,8 @@
   <style include="iron-flex iron-flex-alignment iron-flex-factors">
     :host {
       @apply(--paper-font-common-base);
-      width: 100%;
+      margin:20px;
+      width: 500;
       height:100%
     }
   </style> 
@@ -45,12 +46,28 @@
       on-response="_responsePost">
     </iron-ajax>
 
-    <div>
-     <div>{{fileName}}</div>
+    <div class="vertical layout">
+     <div>
+       File Name
+       <span>{{fileName}}</span>
+     </div>
+     <div>
      <paper-progress value="{{checkedRecord}}" max="{{totalRecord}}"></paper-progress>
-     <div>{{checkedRecord}}</di>
-     <div>{{totalRecord}}</di>
-   
+     </div>
+     <div class="horizontal layout">
+       <div class="flex">
+         <span>{{checkedRecord}}</span>
+         From
+         <span>{{totalRecord}}</span>
+       </div>
+     </div>
+     <div class="horizontal layout">
+       <div>
+         <span>{{insertedRecord}}</span>
+         Inserted
+       </div>
+       
+     </div>
     </div>
       
   </template>
@@ -69,6 +86,7 @@
         }
       },
       checkedRecord:Number,
+      insertedRecord:Number,
       recentRecord: {
         type:String,
         notify:true
@@ -78,6 +96,7 @@
       }
     },
     ready:function() {
+      this.insertedRecord = 0;
       this.$.getfile.generateRequest();
     },
     _iterateCheck:function(index) {
@@ -121,10 +140,13 @@
     },
     _responsePost:function(event) {
       if(event.detail.response.ok) {
+        this.set('insertedRecord',this.insertedRecord+1);
         this._checkNext();
       } 
     },
     _doneCurrent:function(event) {
+      console.log(event.detail.response);
+      this.$.getfile.generateRequest();
     }
   });
 </script>

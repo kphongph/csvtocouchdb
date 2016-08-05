@@ -53,7 +53,27 @@ var get_file = function(list,res) {
 }
 
 app.get('/dmc/save_file',function(req,res) {
-  console.log(req.params.file);
+  console.log(req.query.file);
+  if(req.query.file) {
+    var filepath = path.join(config.school_dir,'loaded');
+    filepath = path.join(filepath,req.query.file);
+    fs.open(filepath, "wx", function (err, fd) {
+      fs.close(fd, function (err) {
+        if(err) {
+          res.json({'ok':false});
+        } else {
+          res.json({'ok':true});
+        }
+      });
+    });
+  }
+});
+
+app.get('/dmc/update_file',function(req,res) {
+  list_waiting(function(waiting) {
+    waiting_file = waiting;
+    res.json(waiting_file);
+  });
 });
 
 app.get('/dmc/get_file',function(req,res) {
