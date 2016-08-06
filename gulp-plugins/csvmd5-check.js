@@ -35,7 +35,10 @@ module.exports = function(dbUrl) {
         is_exists(dbUrl,doc.csv_md5,function(err,exists) {
           count++;
           gutil.log('checked md5 '+count+'/'+docs.length);
-          if(err) callback(err);
+          if(err) { 
+             gutil.log(err);
+             callback(err);
+          }
           if(!exists) {
             new_docs.push(doc);
           } 

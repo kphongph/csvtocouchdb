@@ -14,10 +14,12 @@ var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
 gulp.task('pop',function() {
-  gulp.src('./population/A_Pop_T3/file_1.csv')
-   .pipe(changed('./population/dest/A_Pop_T3'))
+  gulp.src('./population/a-pop-t2/src/file_2.csv')
+   .pipe(changed('./population/a-pop-t2/dest'))
    .pipe(pop_parser())
-   .pipe(gulp.dest('./population/dest/A_Pop_T3'));
+   .pipe(md5check(dbUrl))
+   .pipe(postbulk(dbUrl))
+   .pipe(gulp.dest('./population/a-pop-t2/dest'));
 });
 
 
