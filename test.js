@@ -1,9 +1,8 @@
 var request = require('request');
 
 var json = {
-  source:'http://192.168.1.103:5984/small',
-  target:'http://192.168.1.101:5984/dmc_backup',
-  doc_ids:['00050ec555d93d20d95d96116c01cfb1']
+  source:'small',
+  target:'http://10.27.65.55:5984/dmc_backup'
 };
 
 var options = {

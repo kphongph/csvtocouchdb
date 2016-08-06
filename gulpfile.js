@@ -14,7 +14,7 @@ var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
 gulp.task('pop',function() {
-  gulp.src('./population/a-pop-t2/src/file_2.csv')
+  gulp.src('./population/a-pop-t2/src/file_*.csv')
    .pipe(changed('./population/a-pop-t2/dest'))
    .pipe(pop_parser())
    .pipe(md5check(dbUrl))
