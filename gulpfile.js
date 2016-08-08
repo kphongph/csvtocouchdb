@@ -32,6 +32,23 @@ gulp.task('pop1',function() {
    .pipe(gulp.dest('./population/a-pop-t1/json'));
 });
 
+gulp.task('pop3',function() {
+  gulp.src('./population/a-pop-t3/src/file_*.csv')
+   .pipe(changed('./population/a-pop-t3/json'))
+   .pipe(pop_parser())
+  // .pipe(md5check(dbUrl))
+   .pipe(postbulk(dbUrl))
+   .pipe(gulp.dest('./population/a-pop-t3/json'));
+});
+
+gulp.task('pop4',function() {
+  gulp.src('./population/a-pop-t4/src/file_*.csv')
+   .pipe(changed('./population/a-pop-t4/json'))
+   .pipe(pop_parser())
+  // .pipe(md5check(dbUrl))
+   .pipe(postbulk(dbUrl))
+   .pipe(gulp.dest('./population/a-pop-t4/json'));
+});
 
 gulp.task('compact_view',function() {
   gulp.src('dmc_backup.db')
@@ -64,7 +81,7 @@ gulp.task('update_current_record',function() {
 });
 
 gulp.task('default',function() {
-  gulp.src(['design/**/*.js'])
+  gulp.src(['design/dropout.js'])
     .pipe(changed('./output'))
     .pipe(design(dbUrl))
     .pipe(postbulk(dbUrl))
