@@ -1,18 +1,6 @@
 module.exports.name = 'student';
 
 module.exports.views = {
-  "by_cid": {
-    "map": function(doc) {
-      if(doc.type == "student") {
-        var cid = doc['efPeZGe28XhJ+cIUhqLSBQ=='];
-        emit([cid],1);
-      }
-    },
-    "reduce" : function(key,values,rereduce) {
-      return sum(values);
-    }
-    
-  },
   "study_records": {
     "map": function(doc) {
       if(doc.type == "dmc") {

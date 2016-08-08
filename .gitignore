@@ -7,6 +7,7 @@ output/*
 public/bower_components/*
 working/*
 csv/*
+*.db
 
 # Runtime data
 pids

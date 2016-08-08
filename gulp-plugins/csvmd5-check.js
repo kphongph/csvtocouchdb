@@ -42,8 +42,8 @@ module.exports = function(dbUrl) {
       gutil.log('check md5',file.path);
       check_exists(dbUrl,docs,0,[],function(err,newdocs) {
         if(err) { 
-           gutil.log(err);
-           callback(err);
+          gutil.log(err);
+          callback(err);
         }
         file.contents = new Buffer(JSON.stringify(newdocs));
         _this.push(file);

@@ -8,6 +8,7 @@ var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
 var config = require('./config.js');
 var pop_parser = require('./gulp-plugins/pop-parser');
+var compact_view = require('./gulp-plugins/compact-view');
 
 var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
 var dmc_csv = config.dmc_dir;
@@ -20,6 +21,12 @@ gulp.task('pop',function() {
    .pipe(md5check(dbUrl))
    .pipe(postbulk(dbUrl))
    .pipe(gulp.dest('./population/a-pop-t2/dest'));
+});
+
+
+gulp.task('compact_view',function() {
+  gulp.src('dmc_backup.db')
+   .pipe(compact_view({ts:'1470399454',design:'csv'}));
 });
 
 
