@@ -30,9 +30,11 @@ module.exports = function() {
       var docs = [];
       gutil.log('parsing',file.path);
       
+      /*
       var _file = file.path.split('/');
       var _items = _file[_file.length-1].split('_');
       opts['record_as'] = _items[0]+'/'+parseInt(_items[1],10);
+      */
      
       fs.createReadStream(file.path).pipe(stream)
       .on('headers',function(headers) {
@@ -54,7 +56,7 @@ module.exports = function() {
           _schema.fields.forEach(function(field) {
             tmp[field] = data[field]?data[field]:opts[field];
           });
-          tmp['csv_md5'] = util.hash_row(tmp);
+          tmp['_id'] = 'csv_'+util.hash_row(tmp);
           docs.push(tmp);
         });
       })

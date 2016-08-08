@@ -6,6 +6,7 @@ var path = require('path');
 module.exports = function(url,opts) {
   var opts = opts || {};
   return through.obj(function(file,enc,callback) {
+    var self = this;
     if(file.isBuffer()) {
       var docs = JSON.parse(file.contents.toString());
       var _docs = {'docs':docs};
@@ -21,8 +22,13 @@ module.exports = function(url,opts) {
           body:_docs
         },function(err,response,body) {
           if(err) callback(err);
-          // gutil.log(body);
-          callback(null,file);
+          var new_doc = 0;
+          body.forEach(function(doc) {
+            if(doc.ok) new_doc++;
+          });
+          file.contents = new Buffer(''+new_doc);
+          self.push(file);
+          callback(null);
           // callback(new gutil.PluginError('test', 'debug'));
         });
       } else {

@@ -1,6 +1,6 @@
 exports.couchdb = {
   url:'http://10.27.65.55:5984',
-  db:'dmc_backup'
+  db:'dmc'
 }
 
 exports.dmc_dir = './csv/dmc'; // sub-folder YYYY-0S

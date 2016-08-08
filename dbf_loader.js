@@ -3,9 +3,9 @@ var iconv = require('iconv-lite');
 var _ = require('lodash');
 var fs = require('fs');
 
-var file_name = 'a-pop-t2';
+var file_name = 'a-pop-t1';
 
-var target_dir = './population/'+file_name+'/src';
+var target_dir = './population/'+file_name+'/src/';
 var parser = new DBF('../dbf/'+file_name+'.dbf');
 parser.header.fields.forEach(function(head) {
   head.raw = true;

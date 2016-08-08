@@ -16,11 +16,20 @@ var school_dir = config.school_dir;
 
 gulp.task('pop',function() {
   gulp.src('./population/a-pop-t2/src/file_*.csv')
-   .pipe(changed('./population/a-pop-t2/dest'))
+   .pipe(changed('./population/a-pop-t2/json'))
    .pipe(pop_parser())
-   .pipe(md5check(dbUrl))
+  // .pipe(md5check(dbUrl))
    .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t2/dest'));
+   .pipe(gulp.dest('./population/a-pop-t2/json'));
+});
+
+gulp.task('pop1',function() {
+  gulp.src('./population/a-pop-t1/src/file_*.csv')
+   .pipe(changed('./population/a-pop-t1/json'))
+   .pipe(pop_parser())
+  // .pipe(md5check(dbUrl))
+   .pipe(postbulk(dbUrl))
+   .pipe(gulp.dest('./population/a-pop-t1/json'));
 });
 
 
