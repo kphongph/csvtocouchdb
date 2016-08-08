@@ -8,6 +8,7 @@ var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
 var config = require('./config.js');
 var pop_parser = require('./gulp-plugins/pop-parser');
+var bstudent_parser = require('./gulp-plugins/bstu-parser');
 var compact_view = require('./gulp-plugins/compact-view');
 
 var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
@@ -24,12 +25,21 @@ gulp.task('pop',function() {
 });
 
 gulp.task('pop1',function() {
-  gulp.src('./population/a-pop-t1/src/file_*.csv')
+  gulp.src('./population/a-pop-t1/src/file_1.csv')
    .pipe(changed('./population/a-pop-t1/json'))
-   .pipe(pop_parser())
+   .pipe(bstudent_parser())
+  // .pipe(md5check(dbUrl))
+  // .pipe(postbulk(dbUrl))
+   .pipe(gulp.dest('./population/a-pop-t1/json'));
+});
+
+gulp.task('bstu1',function() {
+  gulp.src('./population/b-stu1/src/file_*.csv')
+   .pipe(changed('./population/b-stu1/json'))
+   .pipe(_parser())
   // .pipe(md5check(dbUrl))
    .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t1/json'));
+   .pipe(gulp.dest('./population/b-stu1/json'));
 });
 
 
