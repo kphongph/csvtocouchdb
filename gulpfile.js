@@ -51,13 +51,13 @@ gulp.task('pop4',function() {
    .pipe(gulp.dest('./population/a-pop-t4/json'));
 });
 
-gulp.task('bstu1',function() {
-  gulp.src('./population/b-stu1/src/file_*.csv')
-   .pipe(changed('./population/b-stu1/json'))
-   .pipe(_parser())
+gulp.task('bstu3',function() {
+  gulp.src('./population/b-stu3/src/file_*.csv')
+   .pipe(changed('./population/b-stu3/json'))
+   .pipe(bstudent_parser())
   // .pipe(md5check(dbUrl))
    .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/b-stu1/json'));
+   .pipe(gulp.dest('./population/b-stu3/json'));
 });
 
 
@@ -75,12 +75,12 @@ gulp.task('compact_view',function() {
 
 
 gulp.task('load_dmc',function() {
-  gulp.src(school_dir+'/src/*.csv')
-    .pipe(changed(school_dir+'/loaded'))
+  gulp.src('../dmc/src/2559_01/*702_2559.csv')
+    .pipe(changed('../dmc/loaded/2559_01'))
     .pipe(dmc_parser())
-    .pipe(md5check(dbUrl))
-    .pipe(postbulk(dbUrl))
-    .pipe(gulp.dest(school_dir+'/loaded'));
+ //   .pipe(md5check(dbUrl))
+ //   .pipe(postbulk(dbUrl))
+    .pipe(gulp.dest('../dmc/loaded/2559_01'));
 });
 
 gulp.task('update_current_record',function() {

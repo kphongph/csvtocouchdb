@@ -6,6 +6,7 @@ var util = require('./util');
 var fs = require('fs');
 
 var schema = [
+/*
   {
     type:'student',  // dmc
     fields:[
@@ -19,6 +20,7 @@ var schema = [
       'PfewC115PY7G19xHOoyC6Q=='  // birthdate
     ]
   },
+*/
   {
     type:'dmc',  // dmc
     fields:[
@@ -45,7 +47,7 @@ module.exports = function() {
       gutil.log('parsing',file.path);
       
       var _file = file.path.split('/');
-      var _items = _file[_file.length-1].split('_');
+      var _items = _file[_file.length-2].split('_');
       opts['record_as'] = _items[0]+'/'+parseInt(_items[1],10);
      
       fs.createReadStream(file.path).pipe(stream)
@@ -70,12 +72,14 @@ module.exports = function() {
             tmp[field] = data[re_map_headers[field]]?
               data[re_map_headers[field]]:opts[field];
           });
-          tmp['csv_md5'] = util.hash_row(tmp);
+          tmp['_id'] = 'csv_'+util.hash_row(tmp);
           docs.push(tmp);
         });
       })
       .on('end',function() {
-        file.contents = new Buffer(JSON.stringify(docs));
+       //  var doc= {'docs':docs};
+       // file.contents = new Buffer(JSON.stringify(doc,null,2));
+        file.contents = new Buffer(JSON.stringify(docs,null,2));
         gutil.log('parsed ',file.path);
         self.push(file);
         callback();
