@@ -13,6 +13,7 @@
     "dbf-parser": "0.0.1",
     "express": "~4.14.0",
     "gulp-delete-file": "~1.0.2",
+    "gulp-replace": "^0.5.4",
     "gulp-respond": "~1.0.0",
     "gulp-streamify": "~1.0.2",
     "gulp-util": "~3.0.7",

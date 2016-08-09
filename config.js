@@ -1,5 +1,5 @@
 exports.couchdb = {
-  url:'http://10.27.65.55:5984',
+  url:'http://192.168.1.105:5984',
   db:'dmc'
 }
 

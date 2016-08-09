@@ -74,13 +74,21 @@ gulp.task('compact_view',function() {
 // });
 
 
-gulp.task('load_dmc',function() {
-  gulp.src('../dmc/src/2559_01/*702_2559.csv')
-    .pipe(changed('../dmc/loaded/2559_01'))
-    .pipe(dmc_parser())
+gulp.task('parse_dmc',function() {
+  gulp.src('../dmc/src/2559_01/*.csv')
+    .pipe(dmc_parser({'split':10000}))
  //   .pipe(md5check(dbUrl))
  //   .pipe(postbulk(dbUrl))
-    .pipe(gulp.dest('../dmc/loaded/2559_01'));
+    .pipe(gulp.dest('../dmc/parsed/2559_01'));
+});
+
+gulp.task('post_dmc',function() {
+  gulp.src('../dmc/parsed/2559_01/*.csv')
+    .pipe(changed('../dmc/sent/2559_01'))
+    //.pipe(dmc_parser())
+ //   .pipe(md5check(dbUrl))
+    .pipe(postbulk(dbUrl))
+    .pipe(gulp.dest('../dmc/sent/2559_01'));
 });
 
 gulp.task('update_current_record',function() {
