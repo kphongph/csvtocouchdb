@@ -1,49 +1,57 @@
 var request = require('request');
 var JSONStream = require('JSONStream');
 
-var stream = request('http://10.27.65.55:5984/dmc/_design/dropout/_view/by_cid?stale=ok')
-  .pipe(JSONStream.parse('rows.*'));
+var query_url = 'http://10.27.65.55:5984/dmc/_design/dropout/_view/by_cid?stale=ok';
 
-var count = 0;
-var no_cid = 0;
+var chunks = [
+ //  {'startkey':'0000000000000','endkey':'0999999999999'},
+   {'startkey':'1000000000000','endkey':'1009999999999'},
+   {'startkey':'1010000000000','endkey':'1019999999999'},
+   {'startkey':'1020000000000','endkey':'1029999999999'}
+];
 
-var limit = 10000;
-var processed = 0;
-var current = null;
+var retrieve = function(region,cb) {
+  var url = query_url+'&startkey=["'+region.startkey+'"]'; 
+  url += '&endkey=["'+region.endkey+'"]'; 
+  var stream = request(url).pipe(JSONStream.parse('rows.*'));
 
-var stats = {
-  'in_pop_not_bstu': 0,
-  'in_pop_in_bstu': 0,
-  'not_pop':0
-};
+  var stats = {
+    'docs':0,
+    'region':region.startkey+'-'+region.endkey,
+    'info': {
+      'in_pop_not_bstu': 0,
+      'in_pop_in_bstu': 0,
+      'not_pop':0
+     }
+  };
 
-var group_cid = function(data) {
-  if(!current) {
-    current = {
-      'cid':data.key[0],
-      'content':[data]
-    };
-    return;
-  }
-  if(current.cid == data.key[0]) {
-    current.content.push(data);
-  } else {
-    processed++;
-    dropout(current);
-    // new cid
-    current.cid = data.key[0];
-    current.content = [data];
-    limit--;
-    console.log(processed);
-    if(limit == 0) {
-      console.log('Processed',processed);
-      console.log(JSON.stringify(stats,null,2));
-      process.exit();
+  var current = null;
+
+  stream.on('data',function(data) {
+    if(!current) {
+      current = {
+        'cid':data.key[0],
+        'content':[data]
+      };
+    } else {
+      stats.docs++;
+      if(current.cid == data.key[0]) {
+        current.content.push(data);
+      } else {
+        dropout(current,stats);
+        current.cid = data.key[0];
+        current.content = [data];
+      }
     }
-  }
+ });
+
+ stream.on('end',function() {
+  cb(stats);
+ });
+
 };
 
-var dropout = function(data) {
+var dropout = function(data,stats) {
   var pop = false;
   var stu = false;
   var dmc = false;
@@ -56,13 +64,24 @@ var dropout = function(data) {
       dmc_record = record.key[2];
     }
   });
-  if(pop&&!stu) stats['in_pop_not_bstu']++;
-  if(pop&&stu) stats['in_pop_in_bstu']++;
-  if(!pop) stats['not_pop']++;
+  if(pop&&!stu) stats.info['in_pop_not_bstu']++;
+  if(pop&&stu) stats.info['in_pop_in_bstu']++;
+  if(!pop) stats.info['not_pop']++;
 };
 
-stream.on('data',function(data) {
-  group_cid(data);  
+var count = 0;
+var report = {};
+
+chunks.forEach(function(chunk) {
+  retrieve(chunk,function(stats) {
+    console.log(stats.region,stats.docs);
+    for(var key in stats.info) {
+      if(!report[key]) report[key] = 0;
+      report[key]+=stats.info[key];
+    }
+    count++;
+    if(count == chunks.length) {
+      console.log(JSON.stringify(report,null,2));
+    }
+  });
 });
-
-
