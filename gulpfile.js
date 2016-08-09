@@ -24,40 +24,22 @@ gulp.task('pop',function() {
    .pipe(gulp.dest('./population/a-pop-t2/json'));
 });
 
-gulp.task('pop1',function() {
-  gulp.src('./population/a-pop-t1/src/file_1.csv')
-   .pipe(changed('./population/a-pop-t1/json'))
+gulp.task('parse_bstu',function() {
+  gulp.src('./population/b-stu3/src/file_*.csv')
+  // .pipe(changed('./population/b-stu3/json'))
    .pipe(bstudent_parser())
   // .pipe(md5check(dbUrl))
   // .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t1/json'));
+   .pipe(gulp.dest('./population/b-stu3/parsed'));
 });
 
-gulp.task('pop3',function() {
-  gulp.src('./population/a-pop-t3/src/file_*.csv')
-   .pipe(changed('./population/a-pop-t3/json'))
-   .pipe(pop_parser())
-  // .pipe(md5check(dbUrl))
-   .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t3/json'));
-});
-
-gulp.task('pop4',function() {
-  gulp.src('./population/a-pop-t4/src/file_*.csv')
-   .pipe(changed('./population/a-pop-t4/json'))
-   .pipe(pop_parser())
-  // .pipe(md5check(dbUrl))
-   .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t4/json'));
-});
-
-gulp.task('bstu3',function() {
-  gulp.src('./population/b-stu3/src/file_*.csv')
-   .pipe(changed('./population/b-stu3/json'))
-   .pipe(bstudent_parser())
-  // .pipe(md5check(dbUrl))
-   .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/b-stu3/json'));
+gulp.task('post_bstu',function() {
+  gulp.src('./population/b-stu3/parsed/*.csv')
+    .pipe(changed('./population/b-stu3/sent'))
+    //.pipe(dmc_parser())
+ //   .pipe(md5check(dbUrl))
+    .pipe(postbulk(dbUrl))
+    .pipe(gulp.dest('./population/b-stu3/sent'));
 });
 
 
@@ -75,11 +57,11 @@ gulp.task('compact_view',function() {
 
 
 gulp.task('parse_dmc',function() {
-  gulp.src('../dmc/src/2559_01/*.csv')
+  gulp.src('../dmc/src/2558_03/*.csv')
     .pipe(dmc_parser({'split':10000}))
  //   .pipe(md5check(dbUrl))
  //   .pipe(postbulk(dbUrl))
-    .pipe(gulp.dest('../dmc/parsed/2559_01'));
+    .pipe(gulp.dest('../dmc/parsed/2558_03'));
 });
 
 gulp.task('post_dmc',function() {
@@ -89,6 +71,15 @@ gulp.task('post_dmc',function() {
  //   .pipe(md5check(dbUrl))
     .pipe(postbulk(dbUrl))
     .pipe(gulp.dest('../dmc/sent/2559_01'));
+});
+
+gulp.task('post_dmc58',function() {
+  gulp.src('../dmc/parsed/2558_03/*.csv')
+    .pipe(changed('../dmc/sent/2558_03'))
+    //.pipe(dmc_parser())
+ //   .pipe(md5check(dbUrl))
+    .pipe(postbulk(dbUrl))
+    .pipe(gulp.dest('../dmc/sent/2558_03'));
 });
 
 gulp.task('update_current_record',function() {

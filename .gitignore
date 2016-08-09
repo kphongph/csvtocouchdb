@@ -9,6 +9,7 @@ working/*
 csv/*
 *.db
 log/*
+population/*
 
 # Runtime data
 pids

@@ -70,10 +70,11 @@ module.exports = function() {
         });
       })
       .on('end',function() {
-        file.contents = new Buffer(JSON.stringify(docs));
+        var doc = {'docs':docs};
+        file.contents = new Buffer(JSON.stringify(doc));
         gutil.log('parsed ',file.path);
         self.push(file);
-        callback();
+        callback(null);
       });
     }
   });
