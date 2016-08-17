@@ -9,8 +9,8 @@ module.exports = function(url,opts) {
     var self = this;
     if(file.isBuffer()) {
       var docs = JSON.parse(file.contents.toString());
-      var _docs = {'docs':docs};
-      gutil.log('POST '+docs.length+' '+path.basename(file.path));
+      // var _docs = {'docs':docs};
+      gutil.log('POST '+docs.docs.length+' '+path.basename(file.path));
       if(docs.length != 0) {
         request({
           method: 'POST',
@@ -19,7 +19,7 @@ module.exports = function(url,opts) {
             'content-type':'application/json'
           },
           url:url+'/_bulk_docs', 
-          body:_docs
+          body:docs
         },function(err,response,body) {
           if(err) callback(err);
           var new_doc = 0;

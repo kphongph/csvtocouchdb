@@ -8,6 +8,8 @@ public/bower_components/*
 working/*
 csv/*
 *.db
+log/*
+population/*
 
 # Runtime data
 pids

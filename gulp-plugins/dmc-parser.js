@@ -4,8 +4,10 @@ var gutil = require('gulp-util');
 var csv = require('csv-parser');
 var util = require('./util');
 var fs = require('fs');
+var path = require('path');
 
 var schema = [
+/*
   {
     type:'student',  // dmc
     fields:[
@@ -19,6 +21,7 @@ var schema = [
       'PfewC115PY7G19xHOoyC6Q=='  // birthdate
     ]
   },
+*/
   {
     type:'dmc',  // dmc
     fields:[
@@ -32,11 +35,13 @@ var schema = [
   }
 ];
 
-module.exports = function() {
-  var opts = {};
+
+module.exports = function(options) {
+  var opts = options?options:{};
   return through.obj(function(file,enc,callback) {
     var self = this;
-    var stream = csv({raw:false,separator:',',escape: '"',quote: '"'});
+    var stream = csv({raw:false,quote:'',escape:''});
+    var seq = 1;
     if(file.isBuffer()) {
       var map_headers = {};
       var re_map_headers = {};
@@ -44,11 +49,22 @@ module.exports = function() {
       var docs = [];
       gutil.log('parsing',file.path);
       
-      var _file = file.path.split('/');
-      var _items = _file[_file.length-1].split('_');
+      var _file = path.parse(file.path);
+      var _items = path.basename(_file.dir).split('_');
       opts['record_as'] = _items[0]+'/'+parseInt(_items[1],10);
-     
-      fs.createReadStream(file.path).pipe(stream)
+      var total_records = -1;
+      fs.createReadStream(file.path)
+      .pipe(through(function(chunk,enc,cb) {
+        for(var i=0;i<chunk.length;i++) {
+          if(chunk[i]==34)  {
+            chunk[i]=0;
+          }
+          if(chunk[i]==10) total_records++;
+        }
+        this.push(chunk);
+        cb();
+      }))
+      .pipe(stream)
       .on('headers',function(headers) {
          headers.forEach(function(val) {
            map_headers[val] = util.thai_hash(val);
@@ -70,15 +86,39 @@ module.exports = function() {
             tmp[field] = data[re_map_headers[field]]?
               data[re_map_headers[field]]:opts[field];
           });
-          tmp['csv_md5'] = util.hash_row(tmp);
+          tmp['_id'] = 'csv_'+util.hash_row(tmp);
           docs.push(tmp);
+          if(docs.length == opts.split) { 
+            var sfile = new gutil.File({
+               base: path.join(__dirname),
+               cwd:__dirname,
+               path:path.join(__dirname,
+                 _file.name+'_'+seq+_file.ext)
+            });
+            seq++;
+            var doc= {'docs':docs};
+            gutil.log(docs.length,_file.name);
+            sfile.contents = new Buffer(JSON.stringify(doc,null,2));
+            self.push(sfile);
+            docs = [];
+          }
         });
       })
       .on('end',function() {
-        file.contents = new Buffer(JSON.stringify(docs));
         gutil.log('parsed ',file.path);
-        self.push(file);
-        callback();
+        if(docs.length > 0) {
+          var doc= {'docs':docs};
+          var sfile = new gutil.File({
+            base: path.join(__dirname),
+            cwd:__dirname,
+            path:path.join(__dirname,
+              _file.name+'_'+seq+_file.ext)
+          });
+          gutil.log(docs.length,_file.name);
+          sfile.contents = new Buffer(JSON.stringify(doc,null,2));
+          self.push(sfile);
+        }
+        callback(null);
       });
     }
   });
