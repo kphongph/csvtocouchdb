@@ -25,11 +25,12 @@ gulp.task('pop',function() {
 });
 
 gulp.task('pop1',function() {
-  gulp.src('./population/a-pop-t1/src/file_1.csv')
+  gulp.src('./population/a-pop-t1/src/file_*.csv')
    .pipe(changed('./population/a-pop-t1/json'))
-   .pipe(bstudent_parser())
+  // .pipe(bstudent_parser())
+   .pipe(pop_parser())
   // .pipe(md5check(dbUrl))
-  // .pipe(postbulk(dbUrl))
+   .pipe(postbulk(dbUrl))
    .pipe(gulp.dest('./population/a-pop-t1/json'));
 });
 
