@@ -4,6 +4,7 @@ var design = require('./gulp-plugins/couchdb-design');
 var dmc_parser = require('./gulp-plugins/dmc-parser');
 var md5check = require('./gulp-plugins/csvmd5-check');
 var postbulk = require('./gulp-plugins/post-bulk');
+var filter = require('./gulp-plugins/json-filter');
 var updateCurrentRecord = require('./gulp-plugins/update-current-record');
 var split = require('./gulp-plugins/csv-split');
 var config = require('./config.js');
@@ -15,39 +16,20 @@ var dbUrl = config.couchdb.url+'/'+config.couchdb.db;
 var dmc_csv = config.dmc_dir;
 var school_dir = config.school_dir;
 
-gulp.task('pop',function() {
-  gulp.src('./population/a-pop-t2/src/file_*.csv')
-   .pipe(changed('./population/a-pop-t2/json'))
-   .pipe(pop_parser())
-  // .pipe(md5check(dbUrl))
-   .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/a-pop-t2/json'));
+
+gulp.task('filter_pop',function() {
+  gulp.src('../n_dmc_backup/dmc_1.json')
+    .pipe(changed('../json/src/pop_info'))
+    .pipe(filter('pop_info'))
+    .pipe(gulp.dest('../json/src/pop_info'))
 });
 
-gulp.task('parse_bstu',function() {
-  gulp.src('./population/b-stu3/src/file_*.csv')
-  // .pipe(changed('./population/b-stu3/json'))
-   .pipe(bstudent_parser())
-  // .pipe(md5check(dbUrl))
-  // .pipe(postbulk(dbUrl))
-   .pipe(gulp.dest('./population/b-stu3/parsed'));
-});
-
-gulp.task('post_bstu',function() {
-  gulp.src('./population/b-stu3/parsed/*.csv')
-    .pipe(changed('./population/b-stu3/sent'))
-    //.pipe(dmc_parser())
- //   .pipe(md5check(dbUrl))
+gulp.task('post_pop',function() {
+  gulp.src('../json/src/pop_info/dmc_*.json')
+    .pipe(changed('../json/sent/pop_info'))
     .pipe(postbulk(dbUrl))
-    .pipe(gulp.dest('./population/b-stu3/sent'));
+    .pipe(gulp.dest('../json/sent/pop_info'));
 });
-
-
-gulp.task('compact_view',function() {
-  gulp.src('dmc_backup.db')
-   .pipe(compact_view({ts:'1470399454',design:'csv'}));
-});
-
 
 gulp.task('parse_dmc',function() {
   gulp.src('../dmc/src/2558_03/*.csv')

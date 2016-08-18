@@ -9,7 +9,7 @@ module.exports = function(url,opts) {
     var self = this;
     if(file.isBuffer()) {
       var docs = JSON.parse(file.contents.toString());
-      // var _docs = {'docs':docs};
+      gutil.log(url);
       gutil.log('POST '+docs.docs.length+' '+path.basename(file.path));
       if(docs.length != 0) {
         request({
@@ -23,10 +23,7 @@ module.exports = function(url,opts) {
         },function(err,response,body) {
           if(err) callback(err);
           var new_doc = 0;
-          body.forEach(function(doc) {
-            if(doc.ok) new_doc++;
-          });
-          file.contents = new Buffer(''+new_doc);
+          file.contents = new Buffer(JSON.stringify(body,null,2));
           self.push(file);
           callback(null);
           // callback(new gutil.PluginError('test', 'debug'));

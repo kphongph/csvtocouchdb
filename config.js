@@ -1,6 +1,6 @@
 exports.couchdb = {
-  url:'http://192.168.1.106:5984',
-  db:'dmc'
+  url:'http://127.0.0.1:5984',
+  db:'population'
 }
 
 exports.dmc_dir = './csv/dmc'; // sub-folder YYYY-0S
